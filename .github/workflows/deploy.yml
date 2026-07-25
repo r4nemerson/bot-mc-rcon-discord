@@ -34,7 +34,8 @@ jobs:
             if [ -d ".git" ]; then
               git pull origin main
             else
-              git clone https://github.com/${{ github.repository }}.git .
+              rm -rf /opt/bot-mc-rcon-discord/*
+              git clone https://github.com/${{ github.repository }} .
             fi
 
             cat > .env << ENV
