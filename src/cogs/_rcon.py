@@ -26,6 +26,7 @@ class RconCog(commands.Cog):
         name="execute",
         description="Execute a Minecraft RCON command"
     )
+    @commands.is_owner()
     async def execute(
         self,
         interaction: discord.Interaction,
