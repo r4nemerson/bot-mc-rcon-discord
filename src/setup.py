@@ -23,7 +23,6 @@ class Setup:
             self.rcon_port = int(os.environ["RCON_PORT"])
             self.rcon_password = os.environ["RCON_PASSWORD"]
             self.bot_token = os.environ["BOT_TOKEN"]
-            self.dc_server_id = int(os.environ["DC_SERVER_ID"])
 
         except KeyError as e:
             loguru.logger.error(f"Missing environment variable: {e}")
