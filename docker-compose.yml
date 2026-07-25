@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
 
     environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - BOT_TOKEN=${DISCORD_TOKEN}
 
       - RCON_HOST=${RCON_HOST}
       - RCON_PORT=${RCON_PORT}
