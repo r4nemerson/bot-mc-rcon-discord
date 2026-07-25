@@ -17,14 +17,16 @@ class RconCog(commands.Cog):
         self.bot = bot
 
 
-    @app_commands.command(
+    rcon = app_commands.Group(
         name="rcon",
+        description="Executar comandos RCON no servidor Minecraft"
+    )
+
+    @rcon.command(
+        name="execute",
         description="Execute a Minecraft RCON command"
     )
-    @app_commands.describe(
-        command="Minecraft command to execute"
-    )
-    async def rcon(
+    async def execute(
         self,
         interaction: discord.Interaction,
         command: str
@@ -96,12 +98,9 @@ class RconCog(commands.Cog):
                 ephemeral=True
             )
 
-    @app_commands.command(
+    @rcon.command(
         name="say",
         description="Send a message to the Minecraft server chat"
-    )
-    @app_commands.describe(
-        message="Message to send"
     )
     async def say(
         self,
