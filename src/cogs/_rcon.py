@@ -165,3 +165,105 @@ class RconCog(commands.Cog):
                 embed=embed,
                 ephemeral=True
             )
+
+    @rcon.command(
+        name="status",
+        description="Mostra o status do servidor"
+    )
+    async def status(
+        self,
+        interaction: discord.Interaction
+    ):
+
+        await interaction.response.defer()
+
+        try:
+            with MCRcon(
+                setup.rcon_host,
+                setup.rcon_password,
+                port=setup.rcon_port
+            ) as rcon:
+
+                players = rcon.command("list")
+                time = rcon.command(
+                    "time query daytime"
+                )
+                difficulty = rcon.command(
+                    "difficulty"
+                )
+                seed = rcon.command(
+                    "seed"
+                )
+
+                try:
+                    version = rcon.command(
+                        "version"
+                    )
+                except:
+                    version = "Não disponível"
+
+                try:
+                    tps = rcon.command(
+                        "tps"
+                    )
+                except:
+                    tps = "Não disponível"
+
+
+            ticks = int(
+                time.split()[-1]
+            )
+
+            periodo = (
+                "☀️ Dia"
+                if ticks < 13000
+                else "🌙 Noite"
+            )
+
+
+            embed = discord.Embed(
+                title="🟢 Minecraft Status",
+                color=0x00ff00
+            )
+
+            embed.add_field(
+                name="👥 Players",
+                value=players,
+                inline=False
+            )
+
+            embed.add_field(
+                name="☀️ Tempo",
+                value=f"{periodo} ({ticks})"
+            )
+
+            embed.add_field(
+                name="⚙️ Dificuldade",
+                value=difficulty
+            )
+
+            embed.add_field(
+                name="🌎 Seed",
+                value=seed
+            )
+
+            embed.add_field(
+                name="🎮 Versão",
+                value=version
+            )
+
+            embed.add_field(
+                name="⚡ TPS",
+                value=tps
+            )
+
+
+            await interaction.followup.send(
+                embed=embed
+            )
+
+
+        except Exception as e:
+            await interaction.followup.send(
+                f"🔴 Servidor offline\n`{e}`"
+            )
