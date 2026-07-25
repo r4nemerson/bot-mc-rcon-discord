@@ -1,0 +1,68 @@
+name: Deploy Discord Bot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+
+      - name: Deploy to Docker server
+        env:
+          REMOTE_IP: ${{ secrets.REMOTE_DOCKER_IP }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          RCON_HOST: ${{ secrets.RCON_HOST }}
+          RCON_PORT: ${{ secrets.RCON_PORT }}
+          RCON_PASSWORD: ${{ secrets.RCON_PASSWORD }}
+
+        run: |
+
+          ssh -p 7001 -o StrictHostKeyChecking=no \
+          ${REMOTE_USER}@${REMOTE_IP} << EOF
+
+            mkdir -p /opt/bot-mc-rcon-discord
+
+            cd /opt/bot-mc-rcon-discord
+
+
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone \
+              https://github.com/${{ github.repository }} .
+            fi
+
+
+            cat > .env << ENV
+
+DISCORD_TOKEN=${DISCORD_TOKEN}
+
+RCON_HOST=${RCON_HOST}
+RCON_PORT=${RCON_PORT}
+RCON_PASSWORD=${RCON_PASSWORD}
+
+ENV
+
+
+            docker compose down
+
+            docker compose up -d --build
+
+          EOF
