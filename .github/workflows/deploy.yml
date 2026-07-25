@@ -22,29 +22,29 @@ jobs:
         env:
           REMOTE_IP: ${{ secrets.REMOTE_DOCKER_IP }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-          RCON_HOST: ${{ secrets.RCON_HOST }}
-          RCON_PORT: ${{ secrets.RCON_PORT }}
-          RCON_PASSWORD: ${{ secrets.RCON_PASSWORD }}
         run: |
-          ssh -p 7001 -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_IP} << 'EOF'
+          # 1. Garante que a pasta existe na VPS e atualiza o código
+          ssh -p 7001 -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_IP} "
             mkdir -p /opt/bot-mc-rcon-discord
             cd /opt/bot-mc-rcon-discord
-
-            if [ -d ".git" ]; then
+            if [ -d .git ]; then
               git pull origin main
             else
-              rm -rf /opt/bot-mc-rcon-discord/*
-              git clone https://github.com/${{ github.repository }} .
+              git clone git@github.com:${{ github.repository }}.git .
             fi
+          "
 
-            cat > .env << ENV
-          DISCORD_TOKEN=${DISCORD_TOKEN}
-          RCON_HOST=${RCON_HOST}
-          RCON_PORT=${RCON_PORT}
-          RCON_PASSWORD=${RCON_PASSWORD}
-          ENV
+          # 2. Envia o arquivo .env diretamente do GitHub Actions para a VPS via SSH
+          ssh -p 7001 -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_IP} "cat > /opt/bot-mc-rcon-discord/.env" << EOF
+          DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+          RCON_HOST=${{ secrets.RCON_HOST }}
+          RCON_PORT=${{ secrets.RCON_PORT }}
+          RCON_PASSWORD=${{ secrets.RCON_PASSWORD }}
+          EOF
 
+          # 3. Sobe os contêineres Docker
+          ssh -p 7001 -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_IP} "
+            cd /opt/bot-mc-rcon-discord
             docker compose down
             docker compose up -d --build
-          EOF
+          "
